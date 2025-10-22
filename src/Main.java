@@ -68,7 +68,7 @@ public class Main {
                 default:
                     System.out.println("Escolha inválida. Tente novamente.");
             }
-        } while (arvore != 0);
+        } while (arvore != null);
     }
 
     private static void operacoesrubroNegra(Scanner scanner, RubroNegra arvore) {
