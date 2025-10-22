@@ -71,7 +71,7 @@ public class Main {
         } while (arvore != 0);
     }
 
-    private static void operacoesrubroNegra(Scanner scanner, rubroNegra arvore) {
+    private static void operacoesrubroNegra(Scanner scanner, RubroNegra arvore) {
         int escolha;
         do {
             System.out.println("\nOperações da Árvore Rubro-Negra:");

@@ -23,7 +23,8 @@ public class AVL {
     }
 
     private NoAVL rotacaoDireita(NoAVL y) {
-        NoAVL x = y.esquerda;public class AVL {
+        NoAVL x = y.esquerda;
+        public class AVL {
 
             private NoAVL raiz;
 
