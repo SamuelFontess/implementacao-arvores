@@ -15,8 +15,8 @@ public class Main {
             AVL avl = new AVL();
             operacoesAVL(scanner, avl);
         } else if (treeType == 2) {
-            // rubro negra
-
+            RubroNegra rn = new RubroNegra();
+            operacoesrubroNegra(scanner, rn);
         } else {
             System.out.println("Escolha inválida. Encerrando o programa.");
         }
@@ -68,7 +68,7 @@ public class Main {
                 default:
                     System.out.println("Escolha inválida. Tente novamente.");
             }
-        } while (arvore != null);
+        } while (escolha != 0);
     }
 
     private static void operacoesrubroNegra(Scanner scanner, RubroNegra arvore) {
