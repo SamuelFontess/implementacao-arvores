@@ -58,7 +58,7 @@ public class AVL {
         }
 
         if (chave < no.chave) {
-            no.esquerda = inserir(no.esquerda, chave);
+            no.esquerda = this.inserir(no.esquerda, chave);
         } else if (chave > no.chave) {
             no.direita = inserir(no.direita, chave);
         } else {
@@ -69,19 +69,23 @@ public class AVL {
 
         int balanco = balanco(no);
 
+        // Caso Esquerda-Esquerda (LL)
         if (balanco > 1 && chave < no.esquerda.chave) {
             return rotacaoDireita(no);
         }
 
+        // Caso Direita-Direita (RR)
         if (balanco < -1 && chave > no.direita.chave) {
             return rotacaoEsquerda(no);
         }
 
-        if (balanco > 1 && chave > no.direita.chave) {
+        // Caso Esquerda-Direita (LR)
+        if (balanco > 1 && chave > no.esquerda.chave) {
             no.esquerda = rotacaoEsquerda(no.esquerda);
             return rotacaoDireita(no);
         }
 
+        // Caso Direita-Esquerda (RL)
         if (balanco < -1 && chave < no.direita.chave) {
             no.direita = rotacaoDireita(no.direita);
             return rotacaoEsquerda(no);
@@ -132,13 +136,8 @@ public class AVL {
         } else if (chave > raiz.chave) {
             raiz.direita = delete(raiz.direita, chave);
         } else {
-            if ((raiz.esquerda == null) || (raiz.direita == null)) {
-                NoAVL temp = null;
-                if (temp == raiz.esquerda) {
-                    temp = raiz.direita;
-                } else {
-                    temp = raiz.esquerda;
-                }
+            if (raiz.esquerda == null || raiz.direita == null) {
+                NoAVL temp = (raiz.esquerda != null) ? raiz.esquerda : raiz.direita;
 
                 if (temp == null) {
                     raiz = null;
