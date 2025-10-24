@@ -3,10 +3,7 @@ public class AVL {
     private NoAVL raiz;
 
     private int altura(NoAVL no) {
-        if (no == null) {
-            return 0;
-        }
-        return no.altura;
+        return (no == null) ? 0 : no.altura;
     }
 
     private void atualizaAltura(NoAVL no) {
@@ -16,15 +13,12 @@ public class AVL {
     }
 
     private int balanco(NoAVL no) {
-        if (no == null) {
-            return 0;
-        }
-        return altura(no.esquerda) - altura(no.direita);
+        return (no == null) ? 0 : altura(no.esquerda) - altura(no.direita);
     }
 
     private NoAVL rotacaoDireita(NoAVL y) {
         NoAVL x = y.esquerda;
-        NoAVL T2 = x.direita;
+        NoAVL T2 = (x != null) ? x.direita : null;
 
         x.direita = y;
         y.esquerda = T2;
@@ -37,10 +31,10 @@ public class AVL {
 
     private NoAVL rotacaoEsquerda(NoAVL x) {
         NoAVL y = x.direita;
-        NoAVL T2 = y.esquerda;
+        NoAVL T2 = (y != null) ? y.esquerda : null;
 
-        y.direita = x;
-        x.esquerda = T2;
+        y.esquerda = x;
+        x.direita = T2;
 
         atualizaAltura(x);
         atualizaAltura(y);
@@ -58,7 +52,7 @@ public class AVL {
         }
 
         if (chave < no.chave) {
-            no.esquerda = this.inserir(no.esquerda, chave);
+            no.esquerda = inserir(no.esquerda, chave);
         } else if (chave > no.chave) {
             no.direita = inserir(no.direita, chave);
         } else {
@@ -69,24 +63,24 @@ public class AVL {
 
         int balanco = balanco(no);
 
-        // Caso Esquerda-Esquerda (LL)
-        if (balanco > 1 && chave < no.esquerda.chave) {
+        // Esquerda-Esquerda (LL)
+        if (balanco > 1 && no.esquerda != null && chave < no.esquerda.chave) {
             return rotacaoDireita(no);
         }
 
-        // Caso Direita-Direita (RR)
-        if (balanco < -1 && chave > no.direita.chave) {
+        // Direita-Direita (RR)
+        if (balanco < -1 && no.direita != null && chave > no.direita.chave) {
             return rotacaoEsquerda(no);
         }
 
-        // Caso Esquerda-Direita (LR)
-        if (balanco > 1 && chave > no.esquerda.chave) {
+        // Esquerda-Direita (LR)
+        if (balanco > 1 && no.esquerda != null && chave > no.esquerda.chave) {
             no.esquerda = rotacaoEsquerda(no.esquerda);
             return rotacaoDireita(no);
         }
 
-        // Caso Direita-Esquerda (RL)
-        if (balanco < -1 && chave < no.direita.chave) {
+        // Direita-Esquerda (RL)
+        if (balanco < -1 && no.direita != null && chave < no.direita.chave) {
             no.direita = rotacaoDireita(no.direita);
             return rotacaoEsquerda(no);
         }
@@ -102,16 +96,10 @@ public class AVL {
         if (no == null) {
             return false;
         }
-
         if (chave == no.chave) {
             return true;
         }
-
-        if (chave < no.chave) {
-            return busca(no.esquerda, chave);
-        } else {
-            return busca(no.direita, chave);
-        }
+        return (chave < no.chave) ? busca(no.esquerda, chave) : busca(no.direita, chave);
     }
 
     private NoAVL menorNo(NoAVL no) {
@@ -126,60 +114,46 @@ public class AVL {
         raiz = delete(raiz, chave);
     }
 
-    private NoAVL delete(NoAVL raiz, int chave) {
-        if (raiz == null) {
-            return raiz;
-        }
+    private NoAVL delete(NoAVL no, int chave) {
+        if (no == null) return no;
 
-        if (chave < raiz.chave) {
-            raiz.esquerda = delete(raiz.esquerda, chave);
-        } else if (chave > raiz.chave) {
-            raiz.direita = delete(raiz.direita, chave);
+        if (chave < no.chave) {
+            no.esquerda = delete(no.esquerda, chave);
+        } else if (chave > no.chave) {
+            no.direita = delete(no.direita, chave);
         } else {
-            if (raiz.esquerda == null || raiz.direita == null) {
-                NoAVL temp = (raiz.esquerda != null) ? raiz.esquerda : raiz.direita;
-
-                if (temp == null) {
-                    raiz = null;
-                } else {
-                    raiz = temp;
-                }
+            if (no.esquerda != null && no.direita != null) {
+                NoAVL temp = menorNo(no.direita);
+                no.chave = temp.chave;
+                no.direita = delete(no.direita, temp.chave);
+            } else if (no.esquerda != null) {
+                no = no.esquerda;
+            } else if (no.direita != null) {
+                no = no.direita;
             } else {
-                NoAVL temp = menorNo(raiz.direita);
-
-                raiz.chave = temp.chave;
-
-                raiz.direita = delete(raiz.direita, temp.chave);
+                no = null;
             }
         }
+        if (no == null) return no;
 
-        if (raiz == null) {
-            return raiz;
+        atualizaAltura(no);
+        int balanco = balanco(no);
+
+        if (balanco > 1 && balanco(no.esquerda) >= 0) {
+            return rotacaoDireita(no);
         }
-
-        atualizaAltura(raiz);
-
-        int balanco = balanco(raiz);
-
-        if (balanco > 1 && balanco(raiz.esquerda) >= 0) {
-            return rotacaoDireita(raiz);
+        if (balanco > 1 && balanco(no.esquerda) < 0) {
+            no.esquerda = rotacaoEsquerda(no.esquerda);
+            return rotacaoDireita(no);
         }
-
-        if (balanco > 1 && balanco(raiz.esquerda) < 0) {
-            raiz.esquerda = rotacaoEsquerda(raiz.esquerda);
-            return rotacaoDireita(raiz);
+        if (balanco < -1 && balanco(no.direita) <= 0) {
+            return rotacaoEsquerda(no);
         }
-
-        if (balanco < -1 && balanco(raiz.direita) <= 0) {
-            return rotacaoEsquerda(raiz);
+        if (balanco < -1 && balanco(no.direita) > 0) {
+            no.direita = rotacaoDireita(no.direita);
+            return rotacaoEsquerda(no);
         }
-
-        if (balanco < -1 && balanco(raiz.direita) > 0) {
-            raiz.direita = rotacaoDireita(raiz.direita);
-            return rotacaoEsquerda(raiz);
-        }
-
-        return raiz;
+        return no;
     }
 
     public void ordem() {
@@ -194,5 +168,4 @@ public class AVL {
             ordem(no.direita);
         }
     }
-
 }
