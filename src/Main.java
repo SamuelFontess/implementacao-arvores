@@ -91,7 +91,9 @@ public class Main {
                     System.out.println("Elemento " + inserirChave + " inserido.");
                     break;
                 case 2:
-                    System.out.println("Remoção não implementada para Árvore Rubro-Negra neste momento.");
+                    System.out.print("Digite o elemento a remover: ");
+                    int deletarChave = scanner.nextInt();
+                    arvore.remover(deletarChave);
                     break;
                 case 3:
                     System.out.print("Digite o elemento a buscar: ");
