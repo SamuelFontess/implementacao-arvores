@@ -2,6 +2,8 @@
 
 Este relatório descreve, em detalhes, as decisões de projeto, as estruturas de dados, as estratégias de balanceamento, as funções implementadas, os principais desafios enfrentados e os testes realizados no projeto de Árvores AVL e Rubro-Negra.
 
+### Link repositório Github: [Implementação de Árvores em Java](https://github.com/SamuelFontess/implementacao-arvores)
+
 ## 1. Estruturas de Dados Escolhidas
 
 ### 1.1. Árvore AVL
