@@ -1,5 +1,9 @@
 # Relatório Técnico — Árvores Balanceadas (AVL e Rubro-Negra)
 
+## Componentes do Grupo EDB 2:
+- Samuel Evaristo de Fontes
+- Caio Tadeu Santos Pessoa
+
 Este relatório descreve, em detalhes, as decisões de projeto, as estruturas de dados, as estratégias de balanceamento, as funções implementadas, os principais desafios enfrentados e os testes realizados no projeto de Árvores AVL e Rubro-Negra.
 
 ### Link repositório Github: [Implementação de Árvores em Java](https://github.com/SamuelFontess/implementacao-arvores)
@@ -107,23 +111,65 @@ A classe `AVL` encapsula todas as operações de uma árvore binária de busca b
   Realiza a travessia em ordem (in-order traversal), imprimindo as chaves dos nós em ordem crescente e finalizando com uma quebra de linha para facilitar a leitura.
 
 ### 3.2. Rubro-Negra (classe `RubroNegra`)
-- `void inserir(int chave)`: cria nó vermelho, insere recursivamente mantendo ponteiros de pai, e chama `corrigirInsercao`.
-- `NoRubroNegra inserirRec(NoRubroNegra atual, NoRubroNegra novo)`: BST recursivo com manutenção de `pai`.
-- `void corrigirInsercao(NoRubroNegra no)`: aplica os casos 1–3 usando tio, avô, rotações e recolorações; garante raiz preta ao final.
-- `void rotacaoEsquerda(NoRubroNegra)`, `void rotacaoDireita(NoRubroNegra)`: atualizam apontadores pai/filhos e, se necessário, a `raiz`.
-- `boolean buscar(int chave)`, `boolean buscarRec(...)`: busca binária recursiva.
-- `public void remover(int chave)`:  localiza o nó a ser removido e executa a exclusão conforme as regras da árvore rubro-negra, realizando transplante de subárvores e acionando corrigirRemocao quando necessário para restaurar as propriedades de balanceamento.
-- `void corrigirRemocao(NoRubroNegra x, NoRubroNegra pai)`: aplica os casos de correção após a remoção de um nó preto, utilizando rotações e recolorações para garantir que todos os caminhos mantenham a mesma altura negra.
-- `void transplantar(NoRubroNegra u, NoRubroNegra v)`: substitui a subárvore enraizada em u pela subárvore enraizada em v, atualizando corretamente o ponteiro pai de v.
-- `NoRubroNegra minimo(NoRubroNegra no)`: retorna o nó com a menor chave em uma subárvore, percorrendo os filhos à esquerda até encontrar o nó mais à esquerda.
-- `NoRubroNegra buscarNo(NoRubroNegra no, int chave)`: retorna o nó correspondente à chave informada (ou null caso não exista), sendo uma versão auxiliar de busca que retorna o próprio nó ao invés de um booleano.
-- `void ordem()`, `void ordemRec(...)`: percurso em ordem imprimindo `chave` seguida de `(R)` ou `(P)` para vermelho/preto.
+
+- **`void inserir(int chave)`**  
+  Responsável por adicionar uma nova chave à árvore. Cria um novo nó já colorido de vermelho para evitar aumento da altura negra e utiliza a função `inserirRec` para encontrar recursivamente a posição correta, atualizando os ponteiros de pai. Após a inserção, chama `corrigirInsercao` para resolver possíveis violações das propriedades rubro-negras por recoloração ou rotações, finalizando ao garantir que a raiz sempre seja preta.
+
+- **`NoRubroNegra inserirRec(NoRubroNegra atual, NoRubroNegra novo)`**  
+  Percorre a árvore de forma recursiva, como em uma árvore binária de busca tradicional (BST), para encontrar a posição de inserção correta. Ao inserir, atualiza o ponteiro de pai do novo nó, fundamental para as operações de correção subsequentes após a inserção.
+
+- **`void corrigirInsercao(NoRubroNegra no)`**  
+  Garante que, após a inserção, as propriedades rubro-negras sejam mantidas. Analisa a cor do pai e do tio do novo nó, decidindo entre recoloração, rotação simples ou dupla (esquerda ou direita). O processo segue subindo na árvore até que nenhuma propriedade seja mais violada. Ao final, assegura que a raiz sempre seja preta, cumprindo a propriedade fundamental da estrutura.
+
+- **`void rotacaoEsquerda(NoRubroNegra x)`, `void rotacaoDireita(NoRubroNegra y)`**  
+  Realizam as rotações essenciais para manter a árvore balanceada, ajustando corretamente todos os ponteiros entre pai, filhos e, se necessário, promovendo um novo nó à posição de raiz. As rotações trabalham sobre dois nós adjacentes e são vitais após inserções e remoções onde ocorre desequilíbrio estrutural.
+
+- **`boolean buscar(int chave)`, `boolean buscarRec(NoRubroNegra no, int chave)`**  
+  Executam busca binária clássica. Percorrem recursivamente a árvore comparando a chave desejada com a do nó atual, navegando à esquerda ou à direita conforme o valor. Retornam verdadeiro se encontrarem a chave, falso caso contrário.
+
+- **`public void remover(int chave)`**  
+  Inicia o processo de remoção, localizando o nó a ser excluído usando busca binária. Realiza o transplante de subárvores conforme necessário (casos com 0, 1 ou 2 filhos), preservando a estrutura binária de busca. Se a remoção afetar a altura negra, ativa a rotina `corrigirRemocao` para restaurar as propriedades rubro-negras através de rotações e recolorações.
+
+- **`void corrigirRemocao(NoRubroNegra x, NoRubroNegra pai)`**  
+  Corrige a árvore caso a remoção de um nó preto viole a propriedade da altura negra. Lida com diferentes configurações dos irmãos do nó "duplo-preto" (termo para um caminho com um nó a menos na contagem preta), utilizando recolorações e rotações para redistribuir a negritude e restaurar o equilíbrio da árvore. O processo segue subindo até que a violação seja corrigida ou alcançada a raiz.
+
+- **`void transplantar(NoRubroNegra u, NoRubroNegra v)`**  
+  Substitui a subárvore enraizada no nó `u` pela subárvore de `v`, ajustando corretamente os ponteiros de pai. É utilizada nos casos de remoção para reorganizar a estrutura da árvore sem violar a ordenação binária.
+
+- **`NoRubroNegra minimo(NoRubroNegra no)`**  
+  Retorna o nó de menor valor dentro de uma subárvore, encontrado ao seguir os ponteiros do filho esquerdo até o nó mais à esquerda (mínimo absoluto), frequentemente usado na etapa de remoção de nós com dois filhos.
+
+- **`NoRubroNegra buscarNo(NoRubroNegra no, int chave)`**  
+  Variante do método de busca que retorna o nó correspondente à chave buscada em vez de um valor booleano. Essencial para as funções internas de remoção que precisam manipular ou acessar o nó diretamente.
+
+- **`void ordem()`, `void ordemRec(NoRubroNegra no)`**  
+  Realizam o percurso em ordem (in-order) na árvore, imprimindo as chaves ordenadamente. Cada chave é seguida de `(R)` para vermelho ou `(P)` para preto, permitindo ao usuário visualizar não apenas os valores em ordem mas também a coloração dos nós, útil para depuração e validação da estrutura.
 
 ## 4. Principais Desafios e Soluções Adotadas
-- Manter consistência da altura (AVL): solução - sempre atualizar alturas após alterações e antes de avaliar rotações.
-- Escolha correta de rotação (AVL): solução - usar fator de balanceamento do nó e comparar a chave com a do filho para decidir LL/RR/LR/RL.
-- Ciclo infinito no print da arvore (AVL): erro lógico nas condições de rotação, inserção e remoção lidam com ponteiros nulos para os filhos: solução - todas as condições de rotação consideram que os filhos existem antes de acessar a chave
-- Manutenção de ponteiros `pai` e casos de correção (Rubro-Negra): solução - garantir atualização cuidadosa de `pai` nas rotações e considerar caso simétrico (quando o pai é filho direito do avô).
+
+### AVL
+
+- **Manter a consistência da altura**  
+  Um dos grandes desafios da AVL é garantir que o atributo de altura dos nós reflita a real estrutura da árvore após qualquer operação. Caso a altura não seja devidamente atualizada, o fator de balanceamento pode indicar erroneamente a necessidade — ou a desnecessidade — de rotações, levando a comportamentos inesperados.  
+  **Solução:** Após cada inserção ou remoção, a implementação sempre recalcula a altura de todo nó afetado. Esse cálculo ocorre de baixo para cima, garantindo que cada nó tenha a altura exata antes da análise do fator de balanceamento.
+
+- **Escolha correta do tipo de rotação**  
+  Se a rotação aplicada não corresponder ao caso de desbalanceamento, a árvore pode não se reequilibrar corretamente, resultando até mesmo em degradação de desempenho.  
+  **Solução:** O algoritmo compara o fator de balanceamento do nó e também da subárvore afetada, junto à relação da chave inserida/removida, para classificar os casos LL, RR, LR ou RL. Assim, a rotação apropriada é escolhida de forma precisa.
+
+- **Prevenção de ciclos infinitos no percurso ou impressões da árvore**  
+  Um erro comum é deixar de verificar a existência (não-nulidade) dos filhos antes de acessar seus atributos, especialmente durante rotações ou impressões, o que pode causar um loop infinito ou exceções em tempo de execução.  
+  **Solução:** Antes de acessar filhos ou suas chaves, sempre há a verificação de nulidade, tornando o algoritmo robusto tanto em árvores densas quanto em estruturas mais rasas, e evitando exceções acidentais.
+
+### Rubro-Negra
+
+- **Manutenção correta dos ponteiros de `pai` e tratamento dos casos simétricos**  
+  Dado que as operações de rotação e transplante envolvem múltiplas atualizações em ponteiros pai-filho, qualquer descuido pode “quebrar” a estrutura bidirecional da árvore, levando à perda ou corrupção de nós. Além disso, é necessário tratar com cuidado os casos simétricos — ou seja, quando o “pai” do nó inserido/removido é filho direito do avô.  
+  **Solução:** A implementação atualiza explicitamente o ponteiro de pai para cada nó afetado nas rotações e transplantes. Os algoritmos de correção consideram todos os casos simétricos, utilizando condicionais claras para diferenciar os contextos (pai-esquerdo vs pai-direito).
+
+- **Deleção de um elemento e restauração das propriedades rubro-negras**  
+  A exclusão em árvores Rubro-Negras representa o maior desafio, já que remover um nó preto pode violar a propriedade de altura negra e propagar problemas para cima na árvore. A complexidade dos casos de correção muitas vezes dificulta tanto a implementação quanto a depuração.  
+  **Solução:** O método `corrigirRemocao` lida sistematicamente com cada situação após uma remoção: verifica a cor do irmão e de seus filhos, alternando entre recoloração, rotação simples ou duplas, e propagação do problema. A abordagem minuciosa e estruturada assegura que, mesmo removendo elementos em posições complexas, as propriedades da árvore sejam restauradas corretamente.
 
 ## 5. Testes Realizados e Resultados Observados
 
@@ -148,4 +194,4 @@ A classe `AVL` encapsula todas as operações de uma árvore binária de busca b
 - O `Main` oferece menus separados para AVL e Rubro-Negra, com operações de Inserir, Remover/Buscar/Imprimir para AVL e Inserir, Remover/Buscar/Imprimir para Rubro-Negra. 
 
 ## 7. Conclusão
-O projeto fornece uma implementação funcional de AVL (com inserção e remoção balanceadas) e de Rubro-Negra (com inserção e remoção balanceadas), com interface de console para testes manuais. Documentação adicional foi criada/atualizada para facilitar compilação, execução e entendimento do código.
+O projeto fornece uma implementação funcional de AVL (com inserção e remoção balanceadas) e de Rubro-Negra (inserção e remoção balanceada), com interface de console para testes manuais. Documentação adicional foi criada/atualizada para facilitar compilação, execução e entendimento do código.
