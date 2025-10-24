@@ -23,14 +23,36 @@ Este relatório descreve, em detalhes, as decisões de projeto, as estruturas de
 ## 2. Estratégias de Balanceamento
 
 ### 2.1. AVL
-- Definição: árvore binária de busca auto-balanceada que mantém o fator de balanceamento de cada nó em {−1, 0, +1}.
-- Rebalanceamento ocorre após inserções e remoções.
-- Rotações utilizadas:
-  - Simples Direita (caso LL): quando o nó fica pesado para a esquerda e a chave foi inserida na subárvore esquerda-esquerda.
-  - Simples Esquerda (caso RR): simétrico para a direita.
-  - Dupla Esquerda-Direita (caso LR): primeiro rotação à esquerda no filho, depois rotação à direita no nó desbalanceado.
-  - Dupla Direita-Esquerda (caso RL): primeiro rotação à direita no filho, depois rotação à esquerda no nó desbalanceado.
-- Atualização da altura: após cada modificação estrutural, recalcula-se a altura do(s) nó(s) afetado(s).
+
+A AVL é uma árvore binária de busca que garante que, após qualquer operação de inserção ou remoção, a estrutura permaneça balanceada. O critério de balanceamento é simples: **o fator de balanceamento de cada nó** (diferença entre as alturas das subárvores esquerda e direita) deve sempre estar entre -1 e +1. Esse controle evita que a árvore se degrade em uma lista ligada, mantendo assim a complexidade das operações em \(O(\log n)\).
+
+#### Detecção de Desbalanceamento
+Após qualquer modificação, a árvore verifica se algum nó ficou desbalanceado. Isso é feito recalculando o fator de balanceamento durante o retorno da recursão das operações. Se for detectado um fator de balanceamento fora dos limites permitidos, é aplicado um procedimento de reequilíbrio.
+
+#### Tipos de Rotações Utilizadas
+
+- **Rotação Simples à Direita (caso LL):**
+  Ocorre quando o nó ficou "pesado" à esquerda, e a chave causadora da desbalanceamento foi inserida na subárvore esquerda-esquerda do nó desbalanceado. Exemplo: Inserção à esquerda do filho esquerdo.  
+  Solução: uma rotação simples à direita sobre o nó desbalanceado restabelece o equilíbrio.
+
+- **Rotação Simples à Esquerda (caso RR):**
+  Situação simétrica ao caso LL, mas para o lado direito: o nó ficou "pesado" à direita devido a inserção na subárvore direita-direita.  
+  Solução: rotação simples à esquerda sobre o nó desbalanceado.
+
+- **Rotação Dupla Esquerda-Direita (caso LR):**
+  Ocorre quando a subárvore esquerda tem um desequilíbrio à direita (inserção ocorrida à direita do filho esquerdo).  
+  Solução: primeiro aplica-se uma rotação à esquerda no filho esquerdo, seguida de uma rotação à direita no nó desbalanceado.
+
+- **Rotação Dupla Direita-Esquerda (caso RL):**
+  Ocorre quando a subárvore direita está desbalanceada à esquerda (inserção à esquerda do filho direito).  
+  Solução: executa-se uma rotação à direita no filho direito, seguida de uma rotação à esquerda no nó desbalanceado.
+
+#### Atualização e Propagação das Alturas
+
+Toda vez que ocorre uma inserção ou remoção, a altura de cada nó afetado é recalculada de baixo para cima recursivamente. Após qualquer rotação, as alturas dos nós envolvidos também são imediatamente ajustadas, garantindo consistência do fator de balanceamento em toda a subárvore afetada.
+
+Essas estratégias garantem que a árvore AVL automaticamente se reequilibre após cada modificação, mantendo suas operações rápidas e eficientes mesmo após grande número de inserções e deleções.
+
 
 ### 2.2. Rubro-Negra
 - Mantém as propriedades clássicas:
@@ -42,18 +64,42 @@ Este relatório descreve, em detalhes, as decisões de projeto, as estruturas de
   - Caso 3 (tio preto e nó em “linha”): recoloração de pai para preto, avô para vermelho, e rotação oposta no avô.
 - Ao final, a raiz é sempre pintada de preto.
 
-## 3. Descrição das Funções Implementadas
+## 3. Descrição Detalhada das Funções Implementadas
 
-### 3.1. AVL (classe `AVL`)
-- `void inserir(int chave)`: API pública que delega para `inserir(NoAVL, int)`.
-- `NoAVL inserir(NoAVL no, int chave)`: insere recursivamente seguind o BST; atualiza alturas; detecta desbalanceamentos e aplica rotações LL, RR, LR, RL.
-- `boolean busca(int chave)`: busca binária recursiva.
-- `void delete(int chave)`: API pública que delega para `delete(NoAVL, int)`.
-- `NoAVL delete(NoAVL no, int chave)`: remove como em BST (0, 1 ou 2 filhos); em caso de 2 filhos, substitui pela menor chave da subárvore direita; atualiza alturas e reequilibra (casos simétricos aos de inserção, usando fator de balanceamento do nó e de seus filhos).
-- `NoAVL menorNo(NoAVL no)`: retorna o nó com a menor chave em uma subárvore (vai à esquerda até o fim).
-- `int altura(NoAVL)`, `void atualizaAltura(NoAVL)`, `int balanco(NoAVL)`: utilitários para manutenção da altura e fator de balanceamento.
-- `NoAVL rotacaoDireita(NoAVL)`, `NoAVL rotacaoEsquerda(NoAVL)`: implementações das rotações, atualizando ligações e alturas.
-- `void ordem()`: percurso em-ordem com impressão das chaves (crescente), com quebra de linha ao final.
+### 3.1. Classe `AVL`
+A classe `AVL` encapsula todas as operações de uma árvore binária de busca balanceada utilizando o algoritmo AVL, garantindo alta eficiência e manutenção automática do equilíbrio estrutural. Abaixo está uma explanação detalhada das principais funções implementadas:
+
+- **`void inserir(int chave)`**  
+  Método público para inserir uma nova chave. Internamente, chama `inserir(NoAVL no, int chave)`, que realiza a busca recursiva pelo local de inserção correto, atualiza alturas dos nós e detecta desbalanceamentos, aplicando rotações de acordo com os casos LL (Left-Left), RR (Right-Right), LR (Left-Right) e RL (Right-Left).
+
+- **`NoAVL inserir(NoAVL no, int chave)`**  
+  Realiza a inserção recursiva em conformidade com as regras de árvore binária de busca. Após adicionar o novo nó, recalcula a altura do nó pai, determina o fator de balanceamento e executa rotações se necessário, restaurando o equilíbrio da árvore AVL.
+
+- **`boolean busca(int chave)`**  
+  Implementa a busca binária recursiva por uma chave específica na árvore. Percorre os nós até encontrar o valor procurado ou determinar sua ausência.
+
+- **`void delete(int chave)`**  
+  Método público para remover uma chave da árvore. Delegada à função recursiva `delete(NoAVL no, int chave)`, que realiza a exclusão conforme o padrão BST e também reequilibra a árvore conforme o fator de balanceamento.
+
+- **`NoAVL delete(NoAVL no, int chave)`**  
+  Lida com a remoção propriamente dita:
+    - Se o nó possui dois filhos, substitui sua chave pela menor chave da subárvore direita e remove esse nó posteriormente.
+    - Após a remoção, atualiza alturas e reequilibra a árvore, aplicando rotações conforme o fator de balanceamento do nó e de seus filhos, mantendo a propriedade AVL.
+
+- **`NoAVL menorNo(NoAVL no)`**  
+  Localiza e retorna o nó com a menor chave dentro de uma subárvore, utilizado principalmente na etapa de remoção quando o nó tem dois filhos.
+
+- **`int altura(NoAVL no)`**, **`void atualizaAltura(NoAVL no)`**, **`int balanco(NoAVL no)`**  
+  Funções utilitárias para calcular e manter os atributos de altura e o fator de balanceamento dos nós, essenciais para detectar e corrigir desbalanceamentos por meio de rotações.
+
+- **`NoAVL rotacaoDireita(NoAVL y)`**, **`NoAVL rotacaoEsquerda(NoAVL x)`**  
+  Implementam as rotações simples necessárias para reequilibrar a árvore:
+    - Rotação à direita corrige excesso de altura à esquerda.
+    - Rotação à esquerda corrige excesso de altura à direita.  
+      Ambas ajustam corretamente as ligações entre nós afetados e atualizam suas alturas.
+
+- **`void ordem()`**  
+  Realiza a travessia em ordem (in-order traversal), imprimindo as chaves dos nós em ordem crescente e finalizando com uma quebra de linha para facilitar a leitura.
 
 ### 3.2. Rubro-Negra (classe `RubroNegra`)
 - `void inserir(int chave)`: cria nó vermelho, insere recursivamente mantendo ponteiros de pai, e chama `corrigirInsercao`.
